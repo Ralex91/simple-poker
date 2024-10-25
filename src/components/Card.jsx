@@ -1,30 +1,31 @@
 import clsx from "clsx"
 import React from "react"
+import { CARDS } from "../utils/constants"
 import Clover from "./Symboles/Clover"
 import Diamond from "./Symboles/Diamond"
 import Heart from "./Symboles/Heart"
 import Spade from "./Symboles/Spade"
 
 const SYMBOLES = {
-  CLOVER: {
+  clovers: {
     name: "Clover",
     component: Clover,
     color: "fill-black",
     textColor: "text-black",
   },
-  HEART: {
+  hearts: {
     name: "Heart",
     component: Heart,
     color: "fill-red-500",
     textColor: "text-red-500",
   },
-  SPADE: {
+  spades: {
     name: "Spade",
     component: Spade,
     color: "fill-black",
     textColor: "text-black",
   },
-  DIAMOND: {
+  diamonds: {
     name: "Diamond",
     component: Diamond,
     color: "fill-red-500",
@@ -32,19 +33,18 @@ const SYMBOLES = {
   },
 }
 
-const Card = ({ symbole = "CLOVER", value }) => {
-  const { component: Symbole, color, textColor } = SYMBOLES[symbole]
+const Card = ({ suit = "clovers", value }) => {
+  const { component: Symbole, color, textColor } = SYMBOLES[suit]
 
   return (
-    <div className="bg-yellow-100 aspect-[2.1/3] w-44 rounded relative flex justify-center items-center">
-      <div className="text-center absolute top-1 left-2">
-        <p className={clsx("text-xl font-bold", textColor)}>{value}</p>
-        <Symbole className={clsx("h-7", color)} />
+    <div className="bg-yellow-100 aspect-[2.1/3] w-32 rounded-xl relative flex justify-center items-center">
+      <div className="flex items-center flex-col absolute top-1 left-2">
+        <p className={clsx("text-5xl font-bold", textColor)}>{CARDS[value]}</p>
+        <Symbole className={clsx("h-10 mt-2", color)} />
       </div>
-      <Symbole className={clsx("h-20", color)} />
-      <div className="text-center absolute bottom-1 right-2 rotate-180">
-        <p className={clsx("text-xl font-bold", textColor)}>{value}</p>
-        <Symbole className={clsx("h-7", color)} />
+
+      <div className="absolute bottom-2 right-2">
+        <Symbole className={clsx("h-20 ml-6", color)} />
       </div>
     </div>
   )
