@@ -1,31 +1,27 @@
 import { useReducer } from "react"
-import { createDeck } from "../utils/gameLogic"
+import { INIT_STATE } from "../utils/constants.js"
+import { createDeck, determineWinner } from "../utils/game.js"
 import Card from "./Card"
-
-const INIT_STATE = {
-  deck: [],
-  playerHand: [],
-  botHand: [],
-  communityCards: [],
-  winner: "",
-}
+import Clover from "./Symboles/Clover"
 
 const gameStateReducer = (state, action) => {
   switch (action.type) {
+    case "PREAPARE_GAME":
+      return {
+        ...state,
+        status: "prepare",
+      }
     case "START_GAME":
       return {
         ...state,
-        ...{
-          deck: action.payload,
-          playerHand: action.payload.slice(0, 2),
-          botHand: action.payload.slice(2, 4),
-          communityCards: action.payload.slice(4, 9),
-        },
+        status: "play",
+        deck: action.payload,
+        playerHand: action.payload.slice(0, 4),
+        botHand: action.payload.slice(4, 8),
+        winner: null,
       }
     case "SET_WINNER":
-      return { ...state, winner: action.payload }
-    case "RESET":
-      return INIT_STATE
+      return { ...state, status: "end", winner: action.payload }
     default:
       return state
   }
@@ -34,44 +30,94 @@ const gameStateReducer = (state, action) => {
 const PokerTable = () => {
   const [gameState, dispatch] = useReducer(gameStateReducer, INIT_STATE)
 
-  const startGame = () => {
+  const handleStartGame = () => {
     dispatch({
-      type: "START_GAME",
-      payload: createDeck(),
+      type: "PREAPARE_GAME",
+    })
+
+    setTimeout(() => {
+      dispatch({
+        type: "START_GAME",
+        payload: createDeck(),
+      })
+    }, 900)
+  }
+
+  const handleResult = () => {
+    const winner = determineWinner(gameState.playerHand, gameState.botHand)
+    dispatch({
+      type: "SET_WINNER",
+      payload: winner,
     })
   }
 
   return (
-    <div className="flex flex-col gap-8 outline outline-amber-500/65 rounded-full p-10">
-      <div className="flex gap-4 justify-center">
-        {gameState.botHand.map((card, index) => (
-          <Card key={index} {...card} />
-        ))}
-      </div>
+    <div className="flex-1">
+      <div className="flex flex-col justify-between items-center gap-8 h-full">
+        <div>
+          <div className="flex gap-4 justify-center">
+            {gameState.botHand.map((card, index) => (
+              <Card
+                flip={
+                  gameState.status !== "prepare" &&
+                  gameState.status !== "play" &&
+                  gameState.deck.length
+                }
+                key={index}
+                {...card}
+              />
+            ))}
+          </div>
+          <p className="text-center text-xl font-extrabold text-yellow-100 mt-5">
+            Bot hand
+          </p>
+        </div>
 
-      <div className="flex gap-4 justify-center">
-        {gameState.communityCards.map((card, index) => (
-          <Card key={index} {...card} />
-        ))}
-      </div>
+        <div className="relative flex flex-col justify-center items-center">
+          <div className="absolute h-96 rounded-full aspect-square bg-green-800/50 flex justify-center items-center">
+            <Clover className="fill-green-800/70 h-52" />
+          </div>
 
-      <div className="flex gap-4 justify-center">
-        {gameState.playerHand.map((card, index) => (
-          <Card key={index} {...card} />
-        ))}
-      </div>
+          {gameState.winner && gameState.status === "end" && (
+            <div className="z-10 text-center font-extrabold text-yellow-100">
+              <p className="text-8xl">{gameState.winner.label}</p>
+              <p className="text-3xl">{gameState.winner.reason}</p>
+            </div>
+          )}
 
-      <button
-        onClick={() => {
-          startGame()
-        }}
-      >
-        Start
-      </button>
-      <button></button>
-      <div className="absolute top-0 right-0">
-        <p>Debug</p>
-        <pre>{JSON.stringify(gameState, null, 2)}</pre>
+          {gameState.status === "end" && (
+            <button
+              className="bg-red-950 text-yellow-100 rounded-xl py-2 px-4 font-bold text-lg z-10 mt-3"
+              onClick={handleStartGame}
+            >
+              Start
+            </button>
+          )}
+
+          {gameState.status === "play" && (
+            <button
+              className="bg-red-950 text-yellow-100 rounded-xl py-2 px-4 font-bold text-lg z-10 mt-3"
+              onClick={handleResult}
+            >
+              Show Result
+            </button>
+          )}
+        </div>
+
+        <div>
+          <p className="text-center text-xl font-extrabold text-yellow-100 mb-5">
+            Your hand
+          </p>
+          <div className="flex gap-4 justify-center">
+            {gameState.playerHand.map((card, index) => (
+              <Card
+                flip={gameState.status !== "prepare" && gameState.deck.length}
+                key={index}
+                {...card}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -1,50 +1,31 @@
 import clsx from "clsx"
 import React from "react"
-import { CARDS } from "../utils/constants"
-import Clover from "./Symboles/Clover"
-import Diamond from "./Symboles/Diamond"
-import Heart from "./Symboles/Heart"
-import Spade from "./Symboles/Spade"
+import { CARDS, SUITS_STYLE } from "../utils/constants"
 
-const SYMBOLES = {
-  clovers: {
-    name: "Clover",
-    component: Clover,
-    color: "fill-black",
-    textColor: "text-black",
-  },
-  hearts: {
-    name: "Heart",
-    component: Heart,
-    color: "fill-red-500",
-    textColor: "text-red-500",
-  },
-  spades: {
-    name: "Spade",
-    component: Spade,
-    color: "fill-black",
-    textColor: "text-black",
-  },
-  diamonds: {
-    name: "Diamond",
-    component: Diamond,
-    color: "fill-red-500",
-    textColor: "text-red-500",
-  },
-}
-
-const Card = ({ suit = "clovers", value }) => {
-  const { component: Symbole, color, textColor } = SYMBOLES[suit]
+const Card = ({ suit = "clovers", value, flip, className }) => {
+  const { component: Symbole, color, textColor } = SUITS_STYLE[suit]
 
   return (
-    <div className="bg-yellow-100 aspect-[2.1/3] w-32 rounded-xl relative flex justify-center items-center">
-      <div className="flex items-center flex-col absolute top-1 left-2">
-        <p className={clsx("text-5xl font-bold", textColor)}>{CARDS[value]}</p>
-        <Symbole className={clsx("h-10 mt-2", color)} />
-      </div>
+    <div className={clsx("flip-card select-none", className)}>
+      <div
+        className="relative flip-card-inner rounded-xl"
+        style={{ transform: flip ? "rotateY(180deg)" : "" }}
+      >
+        <div className="bg-yellow-100 fli aspect-[2.1/3] rounded-xl w-32 flex justify-center items-center flip-card-back">
+          <div className="flex items-center flex-col absolute top-1 left-2">
+            <p className={clsx("text-5xl font-bold", textColor)}>
+              {CARDS[value]}
+            </p>
+            <Symbole className={clsx("h-10 mt-2", color)} />
+          </div>
 
-      <div className="absolute bottom-2 right-2">
-        <Symbole className={clsx("h-20 ml-6", color)} />
+          <div className="absolute bottom-2 right-2">
+            <Symbole className={clsx("h-20 ml-6", color)} />
+          </div>
+        </div>
+        <div className="w-full h-full bg-yellow-100 absolute rounded-xl top-0 left-0 back -z-10 flip-card-front overflow-hidden p-2">
+          <div className="h-full w-full rounded-lg card-pattern"></div>
+        </div>
       </div>
     </div>
   )

@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  transition: transform 0.7s;
+  transform-style: preserve-3d;
+}
+
+.flip-card-front,
+.flip-card-back {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+.card-pattern {
+  --s: 30px; /* control the size*/
+  --c1: #eb6841;
+  --c2: #ed7051;
+
+  background: conic-gradient(
+        from -45deg,
+        var(--c1) 90deg,
+        #0000 0 180deg,
+        var(--c2) 0 270deg,
+        #0000 0
+      )
+      0 calc(var(--s) / 2) / var(--s) var(--s),
+    conic-gradient(from 135deg at 50% 0, var(--c1) 90deg, var(--c2) 0) 0 0 /
+      calc(2 * var(--s)) var(--s);
+}
