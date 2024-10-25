@@ -54,7 +54,7 @@ const PokerTable = () => {
   return (
     <div className="flex-1">
       <div className="flex flex-col justify-between items-center gap-8 h-full">
-        <div>
+        <div className="z-20">
           <div className="flex gap-4 justify-center">
             {gameState.botHand.map((card, index) => (
               <Card
@@ -79,7 +79,7 @@ const PokerTable = () => {
           </div>
 
           {gameState.winner && gameState.status === "end" && (
-            <div className="z-10 text-center font-extrabold text-yellow-100">
+            <div className="text-center font-extrabold text-yellow-100 z-10">
               <p className="text-8xl">{gameState.winner.label}</p>
               <p className="text-3xl">{gameState.winner.reason}</p>
             </div>
@@ -104,7 +104,7 @@ const PokerTable = () => {
           )}
         </div>
 
-        <div>
+        <div className="z-20">
           <p className="text-center text-xl font-extrabold text-yellow-100 mb-5">
             Your hand
           </p>
