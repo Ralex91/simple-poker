@@ -1,5 +1,7 @@
+import clsx from "clsx"
 import { useReducer } from "react"
-import { INIT_STATE } from "../utils/constants.js"
+import { arrayPick } from "../utils/array.js"
+import { INIT_STATE, MAX_RETAKE, MAX_SELECT_CARD } from "../utils/constants.js"
 import { createDeck, determineWinner } from "../utils/game.js"
 import Card from "./Card"
 import Clover from "./Symboles/Clover"
@@ -12,13 +14,39 @@ const gameStateReducer = (state, action) => {
         status: "prepare",
       }
     case "START_GAME":
+      const newDeck = createDeck()
+      const { rest: restOfDeck, sub: playerHand } = arrayPick(newDeck, 4)
+      const { rest: deck, sub: botHand } = arrayPick(restOfDeck, 4)
+
       return {
         ...state,
         status: "play",
-        deck: action.payload,
-        playerHand: action.payload.slice(0, 4),
-        botHand: action.payload.slice(4, 8),
+        deck,
+        playerHand,
+        safeCard: [],
+        changeCard: 0,
+        botHand,
         winner: null,
+      }
+    case "ADD_SAFE_CARD":
+      return {
+        ...state,
+        safeCard: [...state.safeCard, action.payload],
+      }
+    case "REMOVE_SAFE_CARD":
+      return {
+        ...state,
+        safeCard: state.safeCard.filter(
+          (c) =>
+            c.suit !== action.payload.suit || c.value !== action.payload.value
+        ),
+      }
+    case "RETAKE_CARDS":
+      return {
+        ...state,
+        deck: action.payload.deck,
+        playerHand: action.payload.playerHand,
+        changeCard: action.payload.changeCard,
       }
     case "SET_WINNER":
       return { ...state, status: "end", winner: action.payload }
@@ -38,9 +66,50 @@ const PokerTable = () => {
     setTimeout(() => {
       dispatch({
         type: "START_GAME",
-        payload: createDeck(),
       })
     }, 900)
+  }
+
+  const handleSafeCard = (card) => () => {
+    if (gameState.status !== "play") return
+    if (gameState.changeCard >= MAX_RETAKE) return
+
+    const alreadySafeCard = gameState.safeCard.find(
+      (c) => c.suit === card.suit && c.value === card.value
+    )
+
+    if (alreadySafeCard) {
+      dispatch({
+        type: "REMOVE_SAFE_CARD",
+        payload: alreadySafeCard,
+      })
+
+      return
+    }
+
+    if (gameState.safeCard.length >= MAX_SELECT_CARD) return
+
+    dispatch({
+      type: "ADD_SAFE_CARD",
+      payload: card,
+    })
+  }
+
+  const handleRetakeCards = () => {
+    if (gameState.status !== "play") return
+    if (gameState.changeCard >= MAX_RETAKE) return
+
+    const length = gameState.playerHand.length - gameState.safeCard.length
+    const { rest: newDeck, sub: newCards } = arrayPick(gameState.deck, length)
+
+    dispatch({
+      type: "RETAKE_CARDS",
+      payload: {
+        deck: newDeck,
+        playerHand: [...gameState.safeCard, ...newCards],
+        changeCard: gameState.changeCard + 1,
+      },
+    })
   }
 
   const handleResult = () => {
@@ -58,11 +127,7 @@ const PokerTable = () => {
           <div className="flex gap-4 justify-center">
             {gameState.botHand.map((card, index) => (
               <Card
-                flip={
-                  gameState.status !== "prepare" &&
-                  gameState.status !== "play" &&
-                  gameState.deck.length
-                }
+                flip={gameState.status === "end" && gameState.deck.length}
                 key={index}
                 {...card}
               />
@@ -105,12 +170,34 @@ const PokerTable = () => {
         </div>
 
         <div className="z-20">
-          <p className="text-center text-xl font-extrabold text-yellow-100 mb-5">
-            Your hand
+          <p className="text-center text-xl font-extrabold text-yellow-100 mb-5 relative">
+            Your hand{" "}
+            {gameState.status === "play" &&
+              gameState.changeCard < MAX_RETAKE && (
+                <button
+                  className="bg-red-950 absolute right-0 top-0 text-yellow-100 rounded-xl py-2 px-4 font-bold text-sm"
+                  onClick={handleRetakeCards}
+                >
+                  Retake Cards ({`${gameState.changeCard}/${MAX_RETAKE}`})
+                </button>
+              )}
           </p>
+
           <div className="flex gap-4 justify-center">
             {gameState.playerHand.map((card, index) => (
               <Card
+                className={clsx({
+                  "opacity-50":
+                    gameState.status === "play" &&
+                    gameState.changeCard < MAX_RETAKE &&
+                    gameState.safeCard.find(
+                      (c) => c.suit === card.suit && c.value === card.value
+                    ),
+                  "cursor-pointer":
+                    gameState.changeCard < MAX_RETAKE &&
+                    gameState.status === "play",
+                })}
+                onClick={handleSafeCard(card)}
                 flip={gameState.status !== "prepare" && gameState.deck.length}
                 key={index}
                 {...card}

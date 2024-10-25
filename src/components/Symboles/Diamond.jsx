@@ -6,11 +6,11 @@ const Diamond = ({ className }) => (
     id="_x32_"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 512 512"
-    xmlspace="preserve"
+    xmlSpace="preserve"
     className={className}
   >
     <g>
-      <polygon class="st0" points="256,0 72.115,256 256,512 439.885,256 	" />
+      <polygon points="256,0 72.115,256 256,512 439.885,256 	" />
     </g>
   </svg>
 )

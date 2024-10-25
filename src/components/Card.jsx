@@ -2,11 +2,11 @@ import clsx from "clsx"
 import React from "react"
 import { CARDS, SUITS_STYLE } from "../utils/constants"
 
-const Card = ({ suit = "clovers", value, flip, className }) => {
+const Card = ({ suit = "clovers", value, flip, className, ...otherProps }) => {
   const { component: Symbole, color, textColor } = SUITS_STYLE[suit]
 
   return (
-    <div className={clsx("flip-card select-none", className)}>
+    <div className={clsx("flip-card select-none", className)} {...otherProps}>
       <div
         className="relative flip-card-inner rounded-xl"
         style={{ transform: flip ? "rotateY(180deg)" : "" }}

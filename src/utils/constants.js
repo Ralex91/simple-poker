@@ -7,6 +7,8 @@ export const INIT_STATE = {
   status: "end",
   deck: [],
   playerHand: Array.from({ length: 4 }),
+  safeCard: [],
+  changeCard: 0,
   botHand: Array.from({ length: 4 }),
   winner: null,
 }
@@ -53,3 +55,6 @@ export const SUITS_STYLE = {
     textColor: "text-red-500",
   },
 }
+
+export const MAX_SELECT_CARD = 3
+export const MAX_RETAKE = 3
